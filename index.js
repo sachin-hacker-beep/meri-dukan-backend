@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import { DBConnection } from './config/db.config.js';
+import { DBConnection } from './config/DB.config.js';
 import ProductModel from './models/product.model.js';
 dotenv.config();
 const app = express();

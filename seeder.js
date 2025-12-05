@@ -1,4 +1,4 @@
-import {DBConnection} from './config/db.config.js';
+import {DBConnection} from './config/DB.config.js';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import ProductModel from './models/product.model.js';
