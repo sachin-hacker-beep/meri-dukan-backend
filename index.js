@@ -5,17 +5,20 @@ import mongoose from 'mongoose';
 import { DBConnection } from './config/DB.config.js';
 import { userModel } from './models/user.model.js';
 import ProductModel from './models/product.model.js';
+import { cartModel } from './models/cart.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
+import { verifyToken } from './middlewares/auth.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(cookieParser());
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5175',
     credentials: true,
 }));
+app.use(cookieParser());
+
 const PORT = process.env.PORT || 8000;
 app.get('/', (req,res)=>{
     res.send("Meri Dukan Backend is running");
@@ -50,14 +53,15 @@ app.post('/User/SignUp', async (req,res)=>{
             userID: newUser._id,
             email: newUser.email
         }
-        const token = jwt.sign({payload},process.env.JWT_SECRET, {expiresIn: '1h'});
+        const token = jwt.sign(payload,process.env.JWT_SECRET, {expiresIn: '1h'});
         res.cookie('token',token,{
             httpOnly: true,
-            secure: true,
-            sameSite: 'none',
+            secure: false,
+            sameSite: 'lax',
             maxAge: 1 * 60 * 60 * 1000 // 1 hour
         })
-        res.status(201).json({message: "User Created Successfully", token});
+
+        res.status(201).json({message: "User Created Successfully"});
     }
     catch(err){
         console.log("Error during Sign Up", err);
@@ -82,11 +86,11 @@ app.post('/User/login', async (req,res)=>{
             userID: existingUser._id,
             email: existingUser.email
         }
-        const token = jwt.sign({payload},process.env.JWT_SECRET, {expiresIn: '1h'});
+        const token = jwt.sign(payload,process.env.JWT_SECRET, {expiresIn: '1h'});
         res.cookie('token',token,{
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: false,
+            sameSite: 'lax',
             maxAge: 1 * 60 * 60 * 1000 // 1 hour
         })
         res.status(200).json({message: "Login Successful"});
@@ -97,6 +101,63 @@ app.post('/User/login', async (req,res)=>{
         res.status(500).json({message: "Internal Server Error"});
     }
 })
+
+                    //  Making cart Api-s   
+          
+app.post('/add/:productID',verifyToken, async(req,res)=>{
+    try{
+        const {productID}= req.params;
+        const {selectedSize} = req.body;
+        const userID = req.user.userID;
+        if(!selectedSize){
+            return res.status(400).json({message: "Please select a size"});
+        }
+        let cart= await cartModel.findOne({userID});
+        if(!cart){
+            cart = new cartModel({
+                userID,
+                products:[{productID, selectedSize, quantity:1}]
+            })
+            await cart.save();
+            return res.status(201).json({message:"product added to cart"})
+        }
+        
+        const existingItem = cart.products.find(item=> item.productID.toString() === productID && item.selectedSize === selectedSize);
+        if(existingItem){
+            existingItem.quantity +=1;
+            await cart.save();
+        }
+        else{
+            cart.products.push({productID, selectedSize, quantity:1});
+            await cart.save();
+                // return res.status(200).json({message: "Product added to cart"});
+            }
+            return res.status(200).json({message: "Product quantity updated in cart"});
+        }
+        catch(err){
+            console.log("Error while adding to cart", err);
+            res.status(500).json({message: "Internal Server Error"});
+        }
+    })                    
+
+app.get('/cart', verifyToken, async(req,res)=>{
+    try{
+        const userID = req.user.userID;
+        const cart = await cartModel.findOne({userID});
+        if(!cart){
+            res.status(200).json({products:[]});
+        }
+        else{
+            res.status(200).json(cart.products);
+        }
+        
+    }
+    catch(err){
+        console.log("Error while fetching cart", err);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+})
+
 app.listen(PORT, ()=>{
     console.log(`Server is running on port ${PORT}`);
     DBConnection();
