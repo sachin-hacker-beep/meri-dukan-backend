@@ -29,7 +29,8 @@ app.get('/products',async (req,res)=>{
         res.status(200).json(products);
     }
     catch{
-        console.log("error occured")
+        console.log("Error while fetching products", err);
+        res.status(500).json({message: "internal server error"})
     }
 })
 app.post('/User/SignUp', async (req,res)=>{
@@ -49,11 +50,9 @@ app.post('/User/SignUp', async (req,res)=>{
             password:hashedPassword
         })
         await newUser.save();
-        const payload = {
-            userID: newUser._id,
-            email: newUser.email
-        }
-        const token = jwt.sign(payload,process.env.JWT_SECRET, {expiresIn: '1h'});
+        
+        const token = jwt.sign({userID: newUser._id,
+                                email: newUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
         res.cookie('token',token,{
             httpOnly: true,
             secure: true,
@@ -82,11 +81,9 @@ app.post('/User/login', async (req,res)=>{
         if(!checkPass){
             return res.status(401).json({message: "Invalid Credentials"});
         }
-        const payload = {
-            userID: existingUser._id,
-            email: existingUser.email
-        }
-        const token = jwt.sign(payload,process.env.JWT_SECRET, {expiresIn: '1h'});
+        
+        const token = jwt.sign({userID: existingUser._id,
+                                email: existingUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
         res.cookie('token',token,{
             httpOnly: true,
             secure: true,
