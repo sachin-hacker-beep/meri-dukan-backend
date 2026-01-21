@@ -64,13 +64,16 @@ app.post('/User/SignUp', async (req,res)=>{
         await newUser.save();
         
         const token = jwt.sign({userID: newUser._id,
-                                email: newUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
-        res.cookie('token',token,{
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 1 * 60 * 60 * 1000 // 1 hour
-        })
+            email: newUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
+        const isProd = process.env.NODE_ENV === 'production';
+
+res.cookie('token', token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 60 * 60 * 1000
+});
+
 
         res.status(201).json({message: "User Created Successfully"});
     }
@@ -93,15 +96,21 @@ app.post('/User/login', async (req,res)=>{
         if(!checkPass){
             return res.status(401).json({message: "Invalid Credentials"});
         }
-        
+
+        if (!process.env.JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined");
+        }
+
         const token = jwt.sign({userID: existingUser._id,
-                                email: existingUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
-        res.cookie('token',token,{
+            email: existingUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
+        const isProd = process.env.NODE_ENV === 'production';
+
+        res.cookie('token', token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 1 * 60 * 60 * 1000 // 1 hour
-        })
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax',
+            maxAge: 60 * 60 * 1000
+        });
         res.status(200).json({message: "Login Successful"});
 
     }

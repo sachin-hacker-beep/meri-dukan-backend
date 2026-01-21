@@ -6,6 +6,12 @@ export const verifyToken=(req,res,next)=>{
     if(!token){
         return res.status(405).json({message: "Unauthorized: No token provided"});
     }
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({
+            message: "JWT_SECRET is not defined"
+        });
+    }
+
     try{
         const decoded = jwt.verify(token,process.env.JWT_SECRET);
         req.user = {
@@ -14,6 +20,7 @@ export const verifyToken=(req,res,next)=>{
         next();
     }
     catch(err){
-        return res.status(401).json({message: "some error occured"});
+        console.error("JWT VERIFY ERROR ", err);
+        return res.status(401).json({message: err.message || "some error occured"});
     }
 }
