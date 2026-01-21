@@ -13,10 +13,22 @@ import { verifyToken } from './middlewares/auth.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://your-frontend-domain.vercel.app' // add this
+];
+
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
+
 app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;
@@ -28,7 +40,7 @@ app.get('/products',async (req,res)=>{
         const products = await ProductModel.find({});
         res.status(200).json(products);
     }
-    catch{
+    catch(err){
         console.log("Error while fetching products", err);
         res.status(500).json({message: "internal server error"})
     }
