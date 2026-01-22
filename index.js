@@ -13,19 +13,9 @@ import { verifyToken } from './middlewares/auth.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://your-frontend-domain.vercel.app' // add this
-];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: "https://meri-dukan-frontend-qujb.vercel.app",
   credentials: true
 }));
 
@@ -67,13 +57,13 @@ app.post('/User/SignUp', async (req,res)=>{
         const token = jwt.sign({userID: newUser._id,
             email: newUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
         
-        const isProd = process.env.NODE_ENV === 'production';
+        const isProd = process.env.NODE_ENV === "production";
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? 'none' : 'lax',
-            maxAge: 60 * 60 * 1000
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          maxAge: 60 * 60 * 1000
         });
 
         res.status(201).json({message: "User Created Successfully"});
@@ -104,13 +94,13 @@ app.post('/User/login', async (req,res)=>{
 
         const token = jwt.sign({userID: existingUser._id,
             email: existingUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
-        const isProd = process.env.NODE_ENV === 'production';
+        const isProd = process.env.NODE_ENV === "production";
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? 'none' : 'lax',
-            maxAge: 60 * 60 * 1000
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          maxAge: 60 * 60 * 1000
         });
         res.status(200).json({message: "Login Successful"});
 
