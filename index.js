@@ -62,25 +62,30 @@ app.post('/User/SignUp', async (req,res)=>{
             password:hashedPassword
         })
         await newUser.save();
-        
+        console.log("JWT_SECRET on Render:", process.env.JWT_SECRET);
+
         const token = jwt.sign({userID: newUser._id,
             email: newUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
+        
         const isProd = process.env.NODE_ENV === 'production';
 
-res.cookie('token', token, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
-    maxAge: 60 * 60 * 1000
-});
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax',
+            maxAge: 60 * 60 * 1000
+        });
 
 
         res.status(201).json({message: "User Created Successfully"});
     }
-    catch(err){
-        console.log("Error during Sign Up", err);
-        res.status(500).json({message: "Internal Server Error"});
-    }
+    catch (err) {
+        console.error("🔥 SIGNUP ERROR STACK:", err);
+        res.status(500).json({
+          message: err.message,
+          stack: err.stack
+        });
+}
 })
 app.post('/User/login', async (req,res)=>{
     try{
