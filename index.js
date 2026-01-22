@@ -76,16 +76,12 @@ app.post('/User/SignUp', async (req,res)=>{
             maxAge: 60 * 60 * 1000
         });
 
-
         res.status(201).json({message: "User Created Successfully"});
     }
     catch (err) {
-        console.error("🔥 SIGNUP ERROR STACK:", err);
-        res.status(500).json({
-          message: err.message,
-          stack: err.stack
-        });
-}
+        console.error("SIGNUP ERROR 👉", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 })
 app.post('/User/login', async (req,res)=>{
     try{
