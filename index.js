@@ -53,21 +53,10 @@ app.post('/User/SignUp', async (req,res)=>{
             password:hashedPassword
         })
         await newUser.save();
-        console.log("JWT_SECRET on Render:", process.env.JWT_SECRET);
-
         const token = jwt.sign({userID: newUser._id,
             email: newUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
         
-        const isProd = process.env.NODE_ENV === "production";
-
-        res.cookie("token", token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-          maxAge: 60 * 60 * 1000
-        });
-
-        res.status(201).json({message: "User Created Successfully"});
+        res.status(201).json({message: "User Created Successfully", token});
     }
     catch (err) {
         console.error("SIGNUP ERROR 👉", err);
@@ -88,23 +77,9 @@ app.post('/User/login', async (req,res)=>{
         if(!checkPass){
             return res.status(401).json({message: "Invalid Credentials"});
         }
-
-        if (!process.env.JWT_SECRET) {
-            throw new Error("JWT_SECRET is not defined");
-        }
-
         const token = jwt.sign({userID: existingUser._id,
             email: existingUser.email},process.env.JWT_SECRET, {expiresIn: '1h'});
-        const isProd = process.env.NODE_ENV === "production";
-
-        res.cookie("token", token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-          maxAge: 60 * 60 * 1000
-        });
-        res.status(200).json({message: "Login Successful"});
-
+            res.status(200).json({message: "Login Successful" , token});
     }
     catch(err){
         console.log("Error during Login", err);
