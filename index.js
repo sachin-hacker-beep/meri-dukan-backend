@@ -16,10 +16,10 @@ app.use(express.json());
 
 app.use(cors({
   origin: "https://meri-dukan-frontend-qujb.vercel.app",
-  credentials: true,
+//   credentials: true,
 }));
 
-app.options("*", cors());
+// app.options("*", cors());
 app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;
