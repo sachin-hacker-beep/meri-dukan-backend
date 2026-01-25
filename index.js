@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 8000;
 app.get('/', (req,res)=>{
     res.send("Meri Dukan Backend is running");
 })
-app.get('/products',async (req,res)=>{
+app.get('/products',verifyToken,async (req,res)=>{
     try{
         const products = await ProductModel.find({});
         res.status(200).json(products);
