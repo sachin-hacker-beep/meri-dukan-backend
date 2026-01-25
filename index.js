@@ -121,7 +121,7 @@ app.post('/add/:productID',verifyToken, async(req,res)=>{
         }
         catch(err){
             console.log("Error while adding to cart", err);
-            res.status(500).json({message: "Internal Server Error"});
+            res.status(500).json({message: "andar ki Error"});
         }
     })                    
 
