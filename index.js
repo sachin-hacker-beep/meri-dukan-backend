@@ -130,7 +130,7 @@ app.get('/cart', verifyToken, async(req,res)=>{
         const userID = req.user.userID;
         const cart = await cartModel.findOne({userID});
         if(!cart){
-            res.status(200).json({products:[]});
+            res.status(200).json({products:[], message: "plesae login"});
         }
         else{
             res.status(200).json(cart.products);
