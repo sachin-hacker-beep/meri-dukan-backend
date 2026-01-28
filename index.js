@@ -130,11 +130,9 @@ app.get('/cart', async(req,res)=>{
         const userID = req.user.userID;
         const cart = await cartModel.findOne({userID});
         if(!cart){
-            res.status(201).json({products:[], message: "plesae login"});
+            res.status(200).json([]);
         }
-        else{
-            res.status(200).json(cart.products);
-        }
+        res.status(200).json(cart.products);
     }
     catch(err){
         console.log("Error while fetching cart", err);
