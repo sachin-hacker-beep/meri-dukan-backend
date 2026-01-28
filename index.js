@@ -125,17 +125,16 @@ app.post('/add/:productID',verifyToken, async(req,res)=>{
         }
     })                    
 
-app.get('/cart', verifyToken, async(req,res)=>{
+app.get('/cart', async(req,res)=>{
     try{
         const userID = req.user.userID;
         const cart = await cartModel.findOne({userID});
         if(!cart){
-            res.status(200).json({products:[], message: "plesae login"});
+            res.status(201).json({products:[], message: "plesae login"});
         }
         else{
             res.status(200).json(cart.products);
         }
-        
     }
     catch(err){
         console.log("Error while fetching cart", err);
