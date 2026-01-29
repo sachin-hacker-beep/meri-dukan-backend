@@ -140,7 +140,30 @@ app.get('/cart',verifyToken, async(req,res)=>{
         res.status(500).json({message: "Internal Server Error"});
     }
 })
-
+app.delete('/cart/remove/:productID/:selectedSize', verifyToken, async(req,res)=>{
+    try{
+        const {productID, selectedSize}= req.params;
+        const userID = req.user.userID;
+        const cart = await cartModel.findOne({userID});
+        if(!cart){
+            res.status(404).json({message: "Cart not found"});
+        }
+        const findItem = cart.products.find(item => item.productID.toString() === productID && item.selectedSize === selectedSize);
+        if(!findItem){
+            return res.status(404).json({message: "Product not found in cart"});
+        }
+        if(findItem.quantity > 1){
+            findItem.quantity -= 1;
+        }
+        cart.products= cart.products.filter(item => !(item.productID.toString() === productID && item.selectedSize === selectedSize ));
+        await cart.save();
+        res.status(200).json({message: "Product quantity decreased in cart"});
+    }
+    catch(err){
+        console.log("Error while removing item from cart", err);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+});
 app.listen(PORT, ()=>{
     console.log(`Server is running on port ${PORT}`);
     DBConnection();
