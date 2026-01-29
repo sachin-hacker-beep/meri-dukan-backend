@@ -128,7 +128,8 @@ app.post('/add/:productID',verifyToken, async(req,res)=>{
 app.get('/cart',verifyToken, async(req,res)=>{
     try{
         const userID = req.user.userID;
-        const cart = await cartModel.findOne({userID});
+        const cart = await cartModel.findOne({userID})
+        .populate("products.productID");
         if(!cart){
             res.status(200).json([]);
         }
