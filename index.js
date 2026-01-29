@@ -152,6 +152,8 @@ app.delete('/cart/remove/:productID/:selectedSize', verifyToken, async(req,res)=
             res.status(404).json({message: "Cart not found"});
         }
         console.log("latest cart is",cart)
+        console.log(normalizedProductID);
+        console.log(normalizedSize);
         const findItem = cart.products.find(
             (item) =>
             item.productID.toString() === normalizedProductID &&
