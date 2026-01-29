@@ -163,12 +163,13 @@ app.delete('/cart/remove/:productID/:selectedSize', verifyToken, async(req,res)=
             return res.status(404).json({message: "Product not found in cart"});
         }
          if(findItem.quantity > 1){
-             findItem.quantity -= 1;
-             res.status(201).json({message: "Product quantity decreased in cart"});
-         }
-         cart.products= cart.products.filter(item => !(item.productID.toString() === normalizedProductID && item.selectedSize === normalizedSize ));
-         await cart.save();
-        res.status(200).json({message: "Product Removed from cart"});
+            findItem.quantity -= 1;
+            await cart.save();
+            return res.status(200).json({ message: "Product quantity decreased" });
+        }
+        cart.products= cart.products.filter(item => !(item.productID.toString() === normalizedProductID && item.selectedSize === normalizedSize ));
+        await cart.save();
+        return res.status(200).json({message: "Product Removed from cart"});
     }
     catch(err){
         console.log("Error while removing item from cart", err);
