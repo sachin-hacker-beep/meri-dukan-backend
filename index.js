@@ -129,11 +129,11 @@ app.get('/cart',verifyToken, async(req,res)=>{
     try{
         const userID = req.user.userID;
         const cart = await cartModel.findOne({userID})
-        .populate("products");
+        .populate("products.productID");
         if(!cart){
             res.status(200).json([]);
         }
-        res.status(200).json(cart.products);
+        res.status(200).json(cart.products,pr);
     }
     catch(err){
         console.log("Error while fetching cart", err);
