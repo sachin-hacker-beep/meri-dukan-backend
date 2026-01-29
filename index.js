@@ -148,11 +148,12 @@ app.delete('/cart/remove/:productID/:selectedSize', verifyToken, async(req,res)=
         if(!cart){
             res.status(404).json({message: "Cart not found"});
         }
+        console.log("latest cart is",cart)
         const findItem = cart.products.find(item => item.productID.toString() === productID && item.selectedSize === selectedSize);
+        console.log("Found Item to remove:", findItem);
         if(!findItem){
             return res.status(404).json({message: "Product not found in cart"});
         }
-        console.log("Found Item to remove:", findItem);
         // if(findItem.quantity > 1){
         //     findItem.quantity -= 1;
         //     res.status(201).json({message: "Product quantity decreased in cart"});
