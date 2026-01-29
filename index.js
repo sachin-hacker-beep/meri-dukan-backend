@@ -133,7 +133,7 @@ app.get('/cart',verifyToken, async(req,res)=>{
         if(!cart){
             res.status(200).json([]);
         }
-        res.status(200).json(cart.products,pr);
+        res.status(200).json(cart.products);
     }
     catch(err){
         console.log("Error while fetching cart", err);
