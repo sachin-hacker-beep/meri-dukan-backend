@@ -147,10 +147,21 @@ app.delete('/cart/remove/:productID/:selectedSize', verifyToken, async(req,res)=
         const normalizedProductID = productID.toString();
         const normalizedSize = selectedSize.trim().toUpperCase();
         const cart = await cartModel.findOne({userID});
+        console.log("🧨 REMOVE CART API HIT");
+        console.log("➡️ Params:", req.params);
+        console.log("➡️ User ID from token:", req.user?.userID);
 
-        if(!cart){
-            res.status(404).json({message: "Cart not found"});
+
+        if (!cart) {
+            console.error("❌ Cart NOT found for user:", userID);
+            return res.status(404).json({ message: "Cart not found" });
         }
+        console.log("🛒 Cart products:", cart.products.map(item => ({
+            productID: item.productID.toString(),
+            selectedSize: item.selectedSize,
+            quantity: item.quantity
+        })));
+
         console.log("latest cart is",cart)
         console.log(normalizedProductID);
         console.log(normalizedSize);
@@ -159,21 +170,31 @@ app.delete('/cart/remove/:productID/:selectedSize', verifyToken, async(req,res)=
             item.productID.toString() === normalizedProductID &&
             item.selectedSize.toUpperCase() === normalizedSize
         );
-        if(!findItem){
-            return res.status(404).json({message: "Product not found in cart"});
+        if (!findItem) {
+            console.error("❌ MATCH FAILED");
+            console.error("Expected productID:", normalizedProductID);
+            console.error("Expected size:", normalizedSize);
+            console.error("Available items:", cart.products);
+            return res.status(404).json({ message: "Product not found in cart" });
         }
-         if(findItem.quantity > 1){
+         if (findItem.quantity > 1) {
+            console.log("➖ Decreasing quantity from", findItem.quantity);
             findItem.quantity -= 1;
             await cart.save();
+            console.log("✅ Quantity updated successfully");
             return res.status(200).json({ message: "Product quantity decreased" });
         }
+        console.log("🗑 Removing item completely");
         cart.products= cart.products.filter(item => !(item.productID.toString() === normalizedProductID && item.selectedSize === normalizedSize ));
         await cart.save();
+        console.log("🗑 Removing item completely");
+
         return res.status(200).json({message: "Product Removed from cart"});
     }
-    catch(err){
-        console.log("Error while removing item from cart", err);
-        res.status(500).json({message: "Internal Server Error"});
+    catch (err) {
+        console.error("REMOVE CART ERROR:", err);
+        console.error(err.stack);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 });
 app.listen(PORT, ()=>{
